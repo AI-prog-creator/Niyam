@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="description"
+    content="Create and track spiritual Niyams with our web-based application. Manage forms, generate reports, and monitor submissions for Shikshapatri, Chaturmas, and Patotsav events.">
+  <meta name="theme-color" content="#ffffff">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="robots" content="">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati&display=swap" rel="stylesheet">
+
+
+  <!-- Font Links -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <title>Niyam Tracker - Track Your Spiritual Commitments Online</title>
+  <!-- SEO Description -->
+  <meta name="description"
+    content="Create and track spiritual Niyams with our web-based application. Manage forms, generate reports, and monitor submissions for Shikshapatri, Chaturmas, and Patotsav events.">
+
+  <!-- Performance optimization: Preload critical resources -->
+  <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
+
+  <!-- Core CSS and Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Note: Using CDN for development. For production, install Tailwind CSS as a PostCSS plugin -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.45.1/apexcharts.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Project-specific styles -->
+  <style>
+    /* Base styles */
+    :root {
+      --primary-color: #FF6B35;
+      --secondary-color: #004E89;
+      --accent-color: ;
+    }
+
+    /* Strict no-scrollbar rules */
+    * {
+      -ms-overflow-style: none !important;
+      /* IE and Edge */
+      scrollbar-width: none !important;
+      /* Firefox */
+    }
+
+    *::-webkit-scrollbar {
+      display: none !important;
+      /* Chrome, Safari and Opera */
+    }
+
+    /* Typography */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: Inter, Inter, system-ui, sans-serif;
+    }
+
+    body {
+      font-family: Roboto, Inter, system-ui, sans-serif;
+    }
+
+    /* Interactive elements */
+    .interactive-element {
+      transition: all 0.3s ease;
+    }
+
+    .interactive-element:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    /* Custom Modal Styles */
+    .custom-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .custom-modal-content {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: left;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .custom-modal-content button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: #3B82F6;
+      color: white;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+    }
+
+    /* Autocomplete styles */
+    .autocomplete-suggestions {
+      position: absolute;
+      border: 1px solid #ccc;
+      border-top: none;
+      background-color: #fff;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 10;
+      width: calc(100% - 2px);
+      /* Adjust to match input width */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 0 0 0.375rem 0.375rem;
+    }
+
+    .autocomplete-suggestion-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+    }
+
+    .autocomplete-suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .autocomplete-suggestion-item:hover {
+      background-color: #f0f0f0;
+    }
+  </style>
+
+  <!-- Dynamic Meta Tags -->
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <meta name="robots" content="">
+  <meta property="og:title" content="">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:site_name" content="Niyam Tracker">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="tilak.svg">
+
+  <!-- Header Scripts -->
+  <script id="header-scripts">
+    // This script tag will be replaced with actual scripts.head content
+    if (window.scripts && window.scripts.head) {
+      document.getElementById('header-scripts').outerHTML = window.scripts.head;
+    }
+  </script>
+
+  <!-- Project Configuration -->
+  <script>
+    window.projectConfig = {
+      name: 'Niyam Tracker',
+      type: '',
+      settings: {
+        colors: {
+          primary: '#FF6B35',
+          secondary: '#004E89',
+          accent: ''
+        },
+        fonts: {
+          primary: 'Inter',
+          secondary: 'Roboto'
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Hide all main sections by default */
+    section {
+      display: none;
+    }
+
+    /* Specific styles for the login page */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f3f4f6;
+    }
+
+    .login-box {
+      background-color: #ffffff;
+      padding: 2.5rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1-px rgba(0, 0, 0, 0.06);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .login-box h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #1f2937;
+    }
+
+    .login-box label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #4b5563;
+      margin-bottom: 0.5rem;
+    }
+
+    .login-box input[type="tel"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      font-size: 1rem;
+      color: #1f2937;
+      margin-bottom: 1.5rem;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .login-box input[type="tel"]:focus {
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+      /* Blue-500 with opacity */
+      border-color: #3b82f6;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+      background-color: #2563eb;
+      /* Blue-600 */
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.15s ease-in-out;
+    }
+
+    .login-box button:hover {
+      background-color: #1d4ed8;
+      /* Blue-700 */
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+    rel="stylesheet">
+</head>
+
+<body class="antialiased text-gray-900 bg-white min-h-screen flex flex-col">
+  <!-- Custom Modal HTML -->
+  <div id="custom-alert-modal" class="custom-modal hidden">
+    <div class="custom-modal-content">
+      <p id="custom-alert-message"></p>
+      <button onclick="hideCustomAlert()">OK</button>
+    </div>
+  </div>
+
+  <!-- Preview Modal for Niyam Forms -->
+  <div id="preview-modal" class="custom-modal hidden">
+    <div class="custom-modal-content" style="max-width: 800px; width: 95%; max-height: 90vh; overflow-y: auto;">
+      <div id="preview-modal-content"></div>
+    </div>
+  </div>
+
+  <!-- Login/Registration Container (shown if not logged in) -->
+  <section id="user-auth-section"
+    class="login-container w-full h-screen bg-gray-100 flex items-center justify-center hidden">
+    <div class="bg-white p-8 sm:p-12 rounded-xl shadow-lg w-full max-w-sm sm:max-w-md mx-4 transition-all duration-300">
+
+      <!-- Login Form -->
+      <div id="login-box" class="space-y-6">
+        <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-800">Niyam Tracker</h2>
+        <p class="text-sm text-center text-gray-500">Sign in to your account</p>
+        <form id="login-form" class="space-y-6">
+          <div>
+            <label for="mobile-number" class="block text-sm font-medium text-gray-700">Mobile Number</label>
+            <input type="tel" id="mobile-number" name="mobile-number" required
+              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150">
+          </div>
+          <button type="submit"
+            class="w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 transition-colors duration-150">
+            Login
+          </button>
+        </form>
+        <div class="text-center text-sm text-gray-600">
+          Don't have an account? <a href="#" id="show-registration-link"
+            class="text-indigo-600 hover:text-indigo-800 font-medium">Register here</a>
+        </div>
+      </div>
+
+      <!-- Registration Form -->
+      <div id="registration-box" class="space-y-6 hidden">
+        <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-800">Create Account</h2>
+        <p class="text-sm text-center text-gray-500">Add your details</p>
+        <form id="registration-form" class="space-y-4">
+          <div>
+            <label for="reg-mobile-number" class="block text-sm font-medium text-gray-700">Mobile Number</label>
+            <input type="tel" id="reg-mobile-number" name="reg-mobile-number" required
+              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150">
+          </div>
+          <div>
+            <label for="full-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+            <input type="text" id="full-name" name="full_name" required
+              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150">
+          </div>
+          <div>
+            <label for="village" class="block text-sm font-medium text-gray-700">Village</label>
+            <input type="text" id="village" name="village" required
+              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150">
+          </div>
+          <div>
+            <label for="city" class="block text-sm font-medium text-gray-700">City</label>
+            <input type="text" id="city" name="city" required
+              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150">
+          </div>
+          <div>
+            <label for="state" class="block text-sm font-medium text-gray-700">State</label>
+            <input type="text" id="state" name="state" required
+              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150">
+          </div>
+          <div>
+            <label for="country" class="block text-sm font-medium text-gray-700">Country</label>
+            <input type="text" id="country" name="country" required
+              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150">
+          </div>
+          <button type="submit"
+            class="w-full py-3 px-4 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition-colors duration-150">
+            Register
+          </button>
+        </form>
+        <div class="text-center text-sm text-gray-600">
+          Already have an account? <a href="#" id="show-login-link"
+            class="text-indigo-600 hover:text-indigo-800 font-medium">Login here</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main content area -->
+  <main id="main-content" class="flex-1 relative h-full hidden">
+    <div id="RolloutPageContent">
+      <div class="flex h-screen bg-gray-50">
+        <!-- Sidebar -->
+        <nav id="sidebar"
+          class="w-64 bg-white border-r border-gray-200 flex flex-col fixed z-40 inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out">
+          <div class="flex-1 overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between md:justify-center">
+              <!-- Sidebar close button for mobile -->
+              <button id="close-sidebar-btn"
+                class="md:hidden text-gray-600 hover:text-gray-900 focus:outline-none mr-2">
+                <i class="fas fa-times"></i>
+              </button>
+              <h1 class="text-xl font-bold text-gray-900 whitespace-nowrap">Niyam Tracker</h1>
+            </div>
+            <div id="nav-links" class="flex-1 px-4 py-6 space-y-1">
+              <!-- Admin Navigation -->
+              <a href="#admin-dashboard-new" data-role="admin"
+                class="flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md">
+                <i class="fas fa-list-alt mr-3"></i> Admin Dashboard
+              </a>
+              <a href="#submissions" data-role="admin"
+                class="flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md">
+                <i class="fas fa-file-alt mr-3"></i> Submissions
+              </a>
+              <a href="#reports" data-role="admin"
+                class="flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md">
+                <i class="fas fa-chart-line mr-3"></i> Reports
+              </a>
+              <!-- User Navigation (Single Dashboard) -->
+              <a href="#user-dashboard-new" data-role="user"
+                class="flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md">
+                <i class="fas fa-user mr-3"></i> User Dashboard
+              </a>
+            </div>
+          </div>
+          <!-- Footer and User Info Section (moved to bottom) -->
+          <div class="p-4 border-t border-gray-200">
+            <!-- User Info Section -->
+            <div id="user-info-section" class="flex flex-col items-start hidden mb-4">
+              <span class="text-sm font-medium text-gray-800" id="user-name"></span>
+              <span class="text-xs text-gray-600" id="user-mobile"></span>
+              <span class="text-xs text-gray-600" id="user-city"></span>
+            </div>
+            <!-- Logout Button -->
+            <button id="logout-button"
+              class="w-full py-2 px-4 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors duration-150 hidden">
+              <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </button>
+          </div>
+        </nav>
+
+        <!-- Main Content Area with sticky header for mobile -->
+        <div class="flex-1 flex flex-col min-h-0">
+          <!-- Sticky header for mobile -->
+          <header class="md:hidden flex items-center bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-30">
+            <button id="toggle-sidebar-btn"
+              class="text-blue-600 bg-blue-100 p-2 rounded-md shadow-md focus:outline-none">
+              <i class="fas fa-bars"></i>
+            </button>
+            <span class="text-2xl font-bold text-gray-900 truncate ml-3">Niyam Tracker</span>
+            <span class="w-8"></span> <!-- Spacer for symmetry -->
+          </header>
+          <main class="flex-1 overflow-y-auto">
+            <section id="public-form" class="p-8 bg-gray-50">
+              <div class="max-w-4xl mx-auto">
+                <div class="bg-white shadow rounded-lg">
+                  <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-2xl font-bold text-gray-900" id="public-form-title">Shikshapatri Dwi-shatabdi
+                      Mahotsav</h2>
+                    <p class="text-sm text-gray-600 mt-1" id="public-form-description">Fill your niyam commitment for
+                      this special occasion</p>
+                  </div>
+
+                  <form id="public-niyam-form" class="p-6 space-y-6">
+                    <!-- Mobile Number -->
+                    <div>
+                      <label for="public-mobile" class="block text-sm font-medium text-gray-700 mb-2">
+                        Mobile Number *
+                      </label>
+                      <input type="tel" id="public-mobile" name="public-mobile" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Enter your mobile number">
+                    </div>
+
+                    <!-- User Type Selection -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-3">
+                        Who is this niyam for?
+                      </label>
+                      <div class="space-x-4">
+                        <label class="inline-flex items-center">
+                          <input type="radio" name="user-type" value="self" checked
+                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                          <span class="ml-2 text-sm">For myself</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                          <input type="radio" name="user-type" value="other"
+                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                          <span class="ml-2 text-sm">For someone else</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <!-- User Details (Hidden by default for "For myself") -->
+                    <div id="user-details-section" class="space-y-4 hidden">
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label for="public-full-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name
+                            *</label>
+                          <input type="text" id="public-full-name" name="public-full-name"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            placeholder="Enter full name">
+                        </div>
+                        <div>
+                          <label for="public-village" class="block text-sm font-medium text-gray-700 mb-1">Village
+                            *</label>
+                          <input type="text" id="public-village" name="public-village"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            placeholder="Enter village">
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Niyam Options -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-3">
+                        Select Niyam Options *
+                      </label>
+                      <div class="space-y-4" id="public-niyam-options-container">
+                        <!-- Niyam options will be dynamically loaded -->
+                        <p class="text-gray-500">No Niyams available for this form.</p>
+                      </div>
+                    </div>
+
+                    <!-- Optional Note -->
+                    <div>
+                      <label for="public-note" class="block text-sm font-medium text-gray-700 mb-2">
+                        Optional Note
+                      </label>
+                      <textarea id="public-note" name="public-note" rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Add any additional notes or special intentions"></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex justify-end">
+                      <button type="submit"
+                        class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                        Submit Niyam
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </section>
+            <section id="success-page" class="p-8 bg-gray-50">
+              <div class="max-w-4xl mx-auto">
+                <div class="bg-white shadow rounded-lg">
+                  <div class="p-8 text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                      <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Niyam Submitted Successfully!</h2>
+                    <p class="text-sm text-gray-600 mb-6">Your niyam commitment has been recorded</p>
+
+                    <!-- Niyam Summary -->
+                    <div class="bg-gray-50 rounded-lg p-6 mb-6 text-left" id="success-summary-details">
+                      <!-- Details populated dynamically -->
+                    </div>
+
+                    <!-- Next Actions -->
+                    <div class="space-y-4">
+                      <a href="#my-niyams"
+                        class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                        View My Niyams
+                      </a>
+                      <a href="#user-dashboard-new"
+                        class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                        Back to Dashboard
+                      </a>
+                    </div>
+
+                    <!-- Share Section -->
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                      <p class="text-sm text-gay-600 mb-3">Share this niyam opportunity with others</p>
+                      <div class="flex justify-center space-x-3">
+                        <button id="copy-public-link-btn"
+                          class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                          <svg class="h-4 w-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                              d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114.938-.316 1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                          </svg>
+                          Copy Public Link
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+        </div>
+        </mountpoint>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- Attach logic.js -->
+  <script src="logic.js"></script>
+
+  <!-- Update the sidebar/header area for better responsive layout -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const sidebar = document.getElementById('sidebar');
+      const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
+      const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+
+      if (toggleSidebarBtn) {
+        toggleSidebarBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          sidebar.classList.remove('-translate-x-full');
+        });
+      }
+      if (closeSidebarBtn) {
+        closeSidebarBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          sidebar.classList.add('-translate-x-full');
+        });
+      }
+      // Optional: close sidebar when clicking outside on mobile
+      document.addEventListener('click', function (e) {
+        if (
+          window.innerWidth < 768 &&
+          !sidebar.contains(e.target) &&
+          !toggleSidebarBtn.contains(e.target)
+        ) {
+          sidebar.classList.add('-translate-x-full');
+        }
+      });
+    });
+  </script>
+
+  <!-- Add this to your <style> or Tailwind config for better header handling -->
+  <style>
+    @media (max-width: 768px) {
+      .text-2xl {
+        font-size: 1.25rem !important;
+      }
+
+      .truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 70vw;
+        display: inline-block;
+        vertical-align: middle;
+      }
+    }
+  </style>
+</body>
+
+</html>
