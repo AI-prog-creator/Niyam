@@ -1983,6 +1983,7 @@ document
     }
 
     const submissionData = {
+      form_id: selectedFormOption.dataset.formId,
       form_name: formName,
       name: fullName, // Participant's name
       mobile: mobile, // Participant's mobile
@@ -2291,6 +2292,7 @@ document
     }
 
     const submissionData = {
+      form_id:formDetails.id,
       form_name: formName,
       name: name,
       mobile: publicMobile, // This is the participant's mobile, not necessarily the submitter's

@@ -7,6 +7,7 @@ const { v4: uuidv4 } = require("uuid"); // For generating unique public_id
 const multer = require("multer");
 const fs = require("fs");
 const app = express();
+const tablePrefix = "submissions_";
 
 dotenv.config();
 
@@ -27,6 +28,98 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
+async function checkIfViewExists(viewName) {
+  try {
+    const [rows] = await pool.query(`
+      SELECT TABLE_NAME 
+      FROM information_schema.VIEWS 
+      WHERE TABLE_SCHEMA = DATABASE() 
+        AND TABLE_NAME = ?
+    `, [viewName]);
+    
+    return rows.length > 0;
+  } catch (err) {
+    console.error('Error checking view existence:', err.message);
+    return false;
+  }
+}
+
+async function createDynamicView() {
+
+  try {
+    // Get all table names like 'submission_%'
+    const [tables] = await pool.query(`
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = DATABASE()
+        AND table_name LIKE 'submission_%'
+    `);
+
+    if (tables.length === 0) {
+      await pool.query(`DROP VIEW IF EXISTS all_submissions`);
+      console.log('No submission tables found.');
+      return;
+    }
+
+    // 2. Build UNION ALL SQL query
+    const unionParts = tables.map(row => {
+      const name = row.TABLE_NAME || row.table_name;
+      return `SELECT *, '${name}' AS source_table FROM \`${name}\``;
+    });
+
+    const viewSQL = `
+      CREATE OR REPLACE VIEW all_submissions AS
+      ${unionParts.join('\nUNION ALL\n')};
+    `;
+
+    // 3. Create or replace the view
+    await pool.query(viewSQL);
+
+    console.log('View `all_submissions` created successfully.');
+  } catch (err) {
+    console.error('Error creating view:', err.message);
+  } 
+}
+
+async function deleteSubmissionTable(tableName) {
+  try {
+    const dropSQL = `DROP TABLE IF EXISTS \`${tableName}\``;
+    await pool.query(dropSQL);
+    console.log(`Table \`${tableName}\` has been deleted (if it existed).`);
+  } catch (err) {
+    console.error(`Failed to delete submission table for form ID ${formId}:`, err.message);
+  }
+}
+
+async function createSubmissionTable(tableid) {
+
+  try {
+    const createSQL = `
+      CREATE TABLE IF NOT EXISTS \`${tableid}\` (
+        \`id\` int(11) NOT NULL AUTO_INCREMENT,
+        \`form_name\` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+        \`name\` varchar(45) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+        \`mobile\` varchar(45) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+        \`village\` varchar(45) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+        \`city\` varchar(45) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+        \`niyams\` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(\`niyams\`)),
+        \`description\` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+        \`niyam_give_by_name\` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+        \`niyam_give_by_number\` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+        \`submission_date\` datetime DEFAULT current_timestamp(),
+        \`user_type\` varchar(45) DEFAULT NULL,
+        \`status\` varchar(45) DEFAULT NULL,
+        PRIMARY KEY (\`id\`)
+      );
+    `;
+
+    await pool.query(createSQL);
+    console.log(`Table \`${tableid}\` created (or already exists).`);
+    await createDynamicView();
+  } catch (err) {
+    console.error(`Failed to create table "${tableid}":`, err.message);
+  }
+}
 // const pool = mysql.createPool({
 //   host: 'localhost',
 //   user: 'root',
@@ -154,13 +247,24 @@ app.get("/api/users/search", async (req, res) => {
 // GET all forms
 app.get("/api/niyam-forms", async (req, res) => {
   try {
-    const [rows] = await pool.query(`
-            SELECT nf.*, COUNT(s.id) as participant_count
-            FROM niyam_forms nf
-            LEFT JOIN submissions s ON nf.niyam_name = s.form_name
-            GROUP BY nf.id
-            ORDER BY nf.created_date DESC
-        `);
+    let rows = [];
+    if(await checkIfViewExists("all_submissions") == true)
+    {
+      [rows] = await pool.query(`
+              SELECT nf.*, COUNT(s.id) as participant_count
+              FROM niyam_forms nf
+              LEFT JOIN all_submissions s ON nf.niyam_name = s.form_name
+              GROUP BY nf.id
+              ORDER BY nf.created_date DESC
+          `);
+    }else{
+      [rows] = await pool.query(`
+              SELECT nf.*, 0 as participant_count
+              FROM niyam_forms nf
+              GROUP BY nf.id
+              ORDER BY nf.created_date DESC
+          `);
+    }
     const forms = rows.map((row) => ({
       ...row,
       options:
@@ -332,6 +436,7 @@ imagePaths.length > 0 ? imagePaths[0] : null
       message: "Niyam form created successfully!",
       publicId: publicId,
     });
+    createSubmissionTable(tablePrefix+""+result.insertId);
   } catch (err) {
     console.error("Error creating Niyam form:", err);
     res.status(500).json({
@@ -453,39 +558,46 @@ app.delete("/api/niyam-forms/:id", async (req, res) => {
 // GET all submissions
 app.get("/api/submissions", async (req, res) => {
   const { mobile, submittedByMobile } = req.query; // Get mobile and submittedByMobile from query parameters
-  let query = "SELECT * FROM submissions WHERE 1=1";
-  const params = [];
+  if(await checkIfViewExists("all_submissions") == false)
+  {
+    res.json([]);
+  }else
+  {
+    let query = "SELECT * FROM all_submissions WHERE 1=1";
+    const params = [];
 
-  if (mobile) {
-    query += " AND mobile = ?";
-    params.push(mobile);
-  }
-  if (submittedByMobile) {
-    query += " AND niyam_give_by_number = ?"; // Use the new column
-    params.push(submittedByMobile);
-  }
+    if (mobile) {
+      query += " AND mobile = ?";
+      params.push(mobile);
+    }
+    if (submittedByMobile) {
+      query += " AND niyam_give_by_number = ?"; // Use the new column
+      params.push(submittedByMobile);
+    }
 
-  try {
-    const [rows] = await pool.query(query, params);
-    const submissions = rows.map((row) => ({
-      ...row,
-      niyams:
-        typeof row.niyams === "string" ? JSON.parse(row.niyams) : row.niyams,
-      options:
-        typeof row.options === "string" ? JSON.parse(row.options) : row.options,
-    }));
-    res.json(submissions);
-  } catch (err) {
-    console.error("Error fetching submissions:", err);
-    res.status(500).json({
-      message: "Error fetching submissions.",
-    });
+    try {
+      const [rows] = await pool.query(query, params);
+      const submissions = rows.map((row) => ({
+        ...row,
+        niyams:
+          typeof row.niyams === "string" ? JSON.parse(row.niyams) : row.niyams,
+        options:
+          typeof row.options === "string" ? JSON.parse(row.options) : row.options,
+      }));
+      res.json(submissions);
+    } catch (err) {
+      console.error("Error fetching submissions:", err);
+      res.status(500).json({
+        message: "Error fetching submissions.",
+      });
+    }
   }
 });
 
 // CREATE a new submission
 app.post("/api/submissions", async (req, res) => {
   const {
+    form_id,
     form_name,
     name,
     mobile,
@@ -502,7 +614,7 @@ app.post("/api/submissions", async (req, res) => {
 
   try {
     const [result] = await pool.query(
-      "INSERT INTO submissions (form_name, name, mobile, village, city, niyams, submission_date, user_type, niyam_give_by_name, niyam_give_by_number, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO submissions_"+ form_id +" (form_name, name, mobile, village, city, niyams, submission_date, user_type, niyam_give_by_name, niyam_give_by_number, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         form_name,
         name,
@@ -543,7 +655,7 @@ app.get("/api/reports", async (req, res) => {
   try {
     let query = `
             SELECT s.*
-            FROM submissions s
+            FROM all_submissions s
             WHERE s.form_name = ?
         `;
     const params = [formName];
